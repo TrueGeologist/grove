@@ -6,7 +6,7 @@ Grove is a macOS disk map. It scans a folder or volume and draws each item as a 
 
 ## Скачать
 
-Готовую программу можно [скачать с GitHub](https://github.com/TrueGeologist/grove/releases/latest): файл `Grove-1.0.0-macOS.zip`. Распакуйте архив и перенесите `Grove.app` в «Программы».
+Готовую программу можно [скачать с GitHub](https://github.com/TrueGeologist/grove/releases/latest): файл `Grove-1.1.0-macOS.zip`. Распакуйте архив и перенесите `Grove.app` в «Программы».
 
 При первом запуске macOS может написать, что разработчик не опознан. Правый щелчок по Grove → «Открыть». Если этого мало: Системные настройки → Конфиденциальность и безопасность → «Всё равно открыть».
 
@@ -108,7 +108,7 @@ Grove shows what is using space on a Mac. Pick a folder or disk, and the window 
 
 ### Download
 
-The built app is on the [latest GitHub release](https://github.com/TrueGeologist/grove/releases/latest): `Grove-1.0.0-macOS.zip`. Unzip it and move `Grove.app` to Applications.
+The built app is on the [latest GitHub release](https://github.com/TrueGeologist/grove/releases/latest): `Grove-1.1.0-macOS.zip`. Unzip it and move `Grove.app` to Applications.
 
 The zip includes both Apple Silicon and Intel. The first launch may say the developer cannot be verified. Right-click Grove and choose Open. If macOS still blocks it, use System Settings → Privacy & Security → Open Anyway.
 

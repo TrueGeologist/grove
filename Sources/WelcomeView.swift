@@ -8,9 +8,9 @@ struct WelcomeView: View {
         let home = FileManager.default.homeDirectoryForCurrentUser
         return [
             ("house.fill", Copy.home, home.path),
-            ("arrow.down.circle.fill", FileManager.default.displayName(atPath: home.appendingPathComponent("Downloads").path), home.appendingPathComponent("Downloads").path),
-            ("doc.fill", FileManager.default.displayName(atPath: home.appendingPathComponent("Documents").path), home.appendingPathComponent("Documents").path),
-            ("menubar.dock.rectangle", FileManager.default.displayName(atPath: home.appendingPathComponent("Desktop").path), home.appendingPathComponent("Desktop").path),
+            ("arrow.down.circle.fill", Copy.downloads, home.appendingPathComponent("Downloads").path),
+            ("doc.fill", Copy.documents, home.appendingPathComponent("Documents").path),
+            ("menubar.dock.rectangle", Copy.desktop, home.appendingPathComponent("Desktop").path),
         ]
     }
 

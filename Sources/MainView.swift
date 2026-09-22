@@ -13,6 +13,9 @@ struct RootView: View {
         }
         .frame(minWidth: 860, minHeight: 540)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .sheet(isPresented: $session.showAbout) {
+            AboutView()
+        }
     }
 }
 

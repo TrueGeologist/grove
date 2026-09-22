@@ -125,9 +125,41 @@ enum GroveColor {
     }
 }
 
+enum AppLanguage: String, CaseIterable, Identifiable {
+    case system
+    case ru
+    case en
+
+    var id: String { rawValue }
+}
+
+final class LanguageStore: ObservableObject {
+    static let shared = LanguageStore()
+    private static let key = "grove.language"
+
+    @Published var choice: AppLanguage {
+        didSet { UserDefaults.standard.set(choice.rawValue, forKey: Self.key) }
+    }
+
+    var russian: Bool {
+        switch choice {
+        case .ru: return true
+        case .en: return false
+        case .system: return Locale.current.language.languageCode?.identifier == "ru"
+        }
+    }
+
+    private init() {
+        let stored = UserDefaults.standard.string(forKey: Self.key) ?? ""
+        choice = AppLanguage(rawValue: stored) ?? .system
+    }
+}
+
 enum Format {
-    private static var russian: Bool {
-        Locale.current.language.languageCode?.identifier == "ru"
+    private static var russian: Bool { LanguageStore.shared.russian }
+
+    private static var numberLocale: Locale {
+        Locale(identifier: russian ? "ru" : "en")
     }
 
     static func bytes(_ value: Int64) -> String {
@@ -143,18 +175,18 @@ enum Format {
             return "\(sign)\(Int(amount)) \(units[index])"
         }
         let digits = amount >= 10 ? 0 : 1
-        let number = String(format: "%.\(digits)f", locale: Locale.current, amount)
+        let number = String(format: "%.\(digits)f", locale: numberLocale, amount)
         return "\(sign)\(number) \(units[index])"
     }
 
     static func share(_ part: Int64, of whole: Int64) -> String {
         guard whole > 0, part > 0 else { return "0%" }
         let ratio = Double(part) / Double(whole)
-        if ratio < 0.001 { return "<0,1%" }
+        if ratio < 0.001 { return russian ? "<0,1%" : "<0.1%" }
         if ratio < 0.1 {
-            return String(format: "%.1f%%", locale: Locale.current, ratio * 100)
+            return String(format: "%.1f%%", locale: numberLocale, ratio * 100)
         }
-        return String(format: "%.0f%%", locale: Locale.current, ratio * 100)
+        return String(format: "%.0f%%", locale: numberLocale, ratio * 100)
     }
 
     static func files(_ count: Int) -> String {
@@ -167,7 +199,7 @@ enum Format {
 
     static func duration(_ interval: TimeInterval) -> String {
         if interval < 60 {
-            return String(format: "%.1f %@", locale: Locale.current, interval, russian ? "с" : "s")
+            return String(format: "%.1f %@", locale: numberLocale, interval, russian ? "с" : "s")
         }
         let minutes = Int(interval) / 60
         let seconds = Int(interval) % 60
@@ -185,7 +217,7 @@ enum Format {
     static func grouped(_ value: Int) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
-        formatter.locale = Locale.current
+        formatter.locale = numberLocale
         return formatter.string(from: NSNumber(value: value)) ?? "\(value)"
     }
 
@@ -209,7 +241,7 @@ enum Format {
 }
 
 enum Copy {
-    static var russian: Bool { Locale.current.language.languageCode?.identifier == "ru" }
+    static var russian: Bool { LanguageStore.shared.russian }
 
     static var tagline: String { russian ? "Найдите, чем занято место" : "See what is using your disk" }
     static var home: String { russian ? "Домашняя папка" : "Home" }
@@ -273,4 +305,23 @@ enum Copy {
     static var pathCopied: String { russian ? "Путь скопирован" : "Path copied" }
     static var continueMap: String { russian ? "Вернуться к карте" : "Back to the map" }
     static var freedNote: String { russian ? "Освободится около" : "About this much will be freed" }
+    static var downloads: String { russian ? "Загрузки" : "Downloads" }
+    static var documents: String { russian ? "Документы" : "Documents" }
+    static var desktop: String { russian ? "Рабочий стол" : "Desktop" }
+    static var settingsMenu: String { russian ? "Настройки…" : "Settings…" }
+    static var language: String { russian ? "Язык" : "Language" }
+    static var languageSystem: String { russian ? "Как в системе" : "Match System" }
+    static var languageFootnote: String {
+        russian
+            ? "Выбор сохраняется на этом Mac."
+            : "This choice is saved on this Mac."
+    }
+    static var aboutMenu: String { russian ? "О программе" : "About Grove" }
+    static var aboutBody: String {
+        russian
+            ? "Grove показывает, чем занято место на диске. Карта строится на этом компьютере: имена файлов, пути и размеры никуда не отправляются."
+            : "Grove shows what is using space on a disk. The map is built on this Mac: file names, paths, and sizes are not sent anywhere."
+    }
+    static var developer: String { russian ? "Разработчик" : "Developer" }
+    static var aboutClose: String { russian ? "Закрыть" : "Close" }
 }

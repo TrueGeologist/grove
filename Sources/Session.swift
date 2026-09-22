@@ -6,6 +6,7 @@ import SwiftUI
 @MainActor
 final class GroveSession: ObservableObject {
     @Published var showWelcome = true
+    @Published var showAbout = false
     @Published var snapshot = MapSnapshot.empty
     @Published var selectedID: Int64?
     @Published var filter = ""
@@ -266,6 +267,11 @@ final class GroveSession: ObservableObject {
         timer?.invalidate()
         timer = nil
         statusLine = makeStatus(final: true)
+        publish()
+    }
+
+    func relocalize() {
+        guard store != nil else { return }
         publish()
     }
 
