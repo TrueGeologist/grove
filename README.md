@@ -4,6 +4,18 @@ Grove — карта места на диске для macOS. Программа
 
 Grove is a macOS disk map. It scans a folder or volume and draws each item as a tile sized by the space it occupies. The map updates while the scan is still running.
 
+## Скачать
+
+Готовую программу можно [скачать с GitHub](https://github.com/TrueGeologist/grove/releases/latest): файл `Grove-1.0.0-macOS.zip`. Распакуйте архив и перенесите `Grove.app` в «Программы».
+
+При первом запуске macOS может написать, что разработчик не опознан. Правый щелчок по Grove → «Открыть». Если этого мало: Системные настройки → Конфиденциальность и безопасность → «Всё равно открыть».
+
+Сборка в архиве сделана для Apple Silicon и Intel.
+
+## Без интернета
+
+Grove работает без подключения к интернету. Обход диска, карта и список остаются на этом компьютере. Имена файлов, пути и размеры никуда не отправляются: смотреть сеть программе нечем, сервера у неё нет. Разрешения нужны только для чтения ваших папок на этом Mac.
+
 ## Что умеет
 
 - Живой обход диска. Размеры появляются по мере чтения каталогов, а не одним списком в конце.
@@ -58,15 +70,14 @@ open build/Grove.app
 
 Недавние папки запоминаются на этом Mac и показываются на стартовом экране.
 
-## Доступ к диску
+## Разрешения
 
-Grove читает только то, что разрешено вашей учётной записи. Папки вроде «Документы», «Рабочий стол» и «Загрузки» macOS может спросить отдельно при первом обращении.
+Grove читает только то, что разрешено вашей учётной записи. Без этих разрешений часть папок останется закрытой, и карта будет неполной.
 
-Почта, сообщения и часть данных других пользователей видны только с «Полным доступом к диску»:
+- «Документы», «Рабочий стол» и «Загрузки» macOS спрашивает отдельно при первом заходе. Нажмите «Разрешить», иначе эти папки не попадут в обход.
+- Почта, сообщения и данные других пользователей видны только с полным доступом к диску. Grove само в этот список не попадает: Системные настройки → Конфиденциальность и безопасность → Полный доступ к диску → «+» → выберите Grove в «Программах» и включите переключатель. После этого закройте Grove (⌘Q) и откройте снова, затем запустите обход ещё раз.
 
-Системные настройки → Конфиденциальность и безопасность → Полный доступ к диску
-
-Если такие папки встретились во время обхода, Grove пишет, сколько каталогов не удалось прочитать, и даёт ссылку в настройки. Остальная карта при этом остаётся рабочей.
+Если закрытые папки встретились во время обхода, Grove пишет, сколько каталогов не удалось прочитать, и даёт ссылку в настройки. Остальная карта при этом остаётся рабочей.
 
 Симлинки программа не разворачивает, а на другой том не переходит. Каждый диск выбирается отдельно на стартовом экране.
 
@@ -94,6 +105,16 @@ swiftc -O -parse-as-library -swift-version 5 -D GROVE_BENCH \
 ## English
 
 Grove shows what is using space on a Mac. Pick a folder or disk, and the window fills with tiles while the scan runs. Larger tiles are larger items.
+
+### Download
+
+The built app is on the [latest GitHub release](https://github.com/TrueGeologist/grove/releases/latest): `Grove-1.0.0-macOS.zip`. Unzip it and move `Grove.app` to Applications.
+
+The zip includes both Apple Silicon and Intel. The first launch may say the developer cannot be verified. Right-click Grove and choose Open. If macOS still blocks it, use System Settings → Privacy & Security → Open Anyway.
+
+### Offline
+
+Grove does not use the network. The scan, the map, and the list stay on this Mac. File names, paths, and sizes are not sent anywhere: the app has no server and no network code. Permission prompts exist only so it can read folders on this computer. An internet connection is not required.
 
 ### Features
 
@@ -125,7 +146,12 @@ If macOS blocks a downloaded copy because the developer cannot be verified, righ
 
 ### Permissions
 
-Grove reads what your account can already read. macOS may prompt for Documents, Desktop, and Downloads. Mail and other users’ data need Full Disk Access under System Settings → Privacy & Security. Unreadable folders are counted in the window; the rest of the map still works. Symbolic links are not followed, and a scan stays on the volume where it started.
+Grove only reads what your account is allowed to read. Without the prompts below, some folders stay closed and the map is incomplete.
+
+- macOS asks separately the first time Grove opens Documents, Desktop, or Downloads. Choose Allow, or those folders are skipped.
+- Mail, Messages, and other users’ data need Full Disk Access. Grove does not appear there by itself: System Settings → Privacy & Security → Full Disk Access → +, choose Grove in Applications, and turn it on. Quit Grove (⌘Q), open it again, and scan once more.
+
+Unreadable folders are counted in the window; the rest of the map still works. Symbolic links are not followed, and a scan stays on the volume where it started.
 
 ### License
 
