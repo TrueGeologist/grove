@@ -27,7 +27,8 @@ Grove работает без подключения к интернету. Об
 - Перемещение в Корзину. После удаления карта уменьшается сразу. Домашнюю папку и системные каталоги целиком удалить нельзя.
 - Фильтр по имени, в том числе внутри вложенных папок.
 - Цвет по типу файла: видео, фото, архивы, документы, код, программы, образы дисков.
-- Русский и английский интерфейс — по языку системы.
+- Русский и английский интерфейс. Язык выбирается в меню Grove → «Настройки…» (⌘,). По умолчанию берётся язык системы.
+- Справка по Grove — в меню «Справка»: короткое описание, разработчик и ссылка на этот репозиторий.
 
 Размер на карте — это занятое место на диске (выделенные блоки), то есть сколько примерно освободится после удаления. Если файл почти не занимает места, хотя его логический размер большой (клон APFS или файл, не загруженный из iCloud), Grove показывает оба числа.
 
@@ -125,7 +126,8 @@ Grove does not use the network. The scan, the map, and the list stay on this Mac
 - Reveal in Finder, Quick Look, and Move to Trash
 - Name filter, including matches inside subfolders
 - File-type colors
-- Russian or English UI, following the system language
+- Russian or English UI. Choose the language in the Grove menu → Settings… (⌘,). The system language is used until you pick one.
+- Grove Help, in the Help menu, has a short description, the developer, and a link to this repository.
 
 Allocated size is what deletion is likely to free. When a file’s logical size is much larger than its disk size, both numbers are shown.
 

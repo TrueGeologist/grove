@@ -6,7 +6,7 @@ import SwiftUI
 @MainActor
 final class GroveSession: ObservableObject {
     @Published var showWelcome = true
-    @Published var showAbout = false
+    @Published var showHelp = false
     @Published var snapshot = MapSnapshot.empty
     @Published var selectedID: Int64?
     @Published var filter = ""

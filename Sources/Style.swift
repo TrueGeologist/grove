@@ -316,7 +316,7 @@ enum Copy {
             ? "Выбор сохраняется на этом Mac."
             : "This choice is saved on this Mac."
     }
-    static var aboutMenu: String { russian ? "О программе" : "About Grove" }
+    static var helpMenu: String { russian ? "Справка по Grove" : "Grove Help" }
     static var aboutBody: String {
         russian
             ? "Grove показывает, чем занято место на диске. Карта строится на этом компьютере: имена файлов, пути и размеры никуда не отправляются."

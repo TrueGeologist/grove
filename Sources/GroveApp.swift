@@ -24,9 +24,9 @@ struct GroveApp: App {
                 .environmentObject(language)
         }
         .commands {
-            CommandGroup(replacing: .appInfo) {
-                Button(Copy.aboutMenu) {
-                    session.showAbout = true
+            CommandGroup(replacing: .help) {
+                Button(Copy.helpMenu) {
+                    session.showHelp = true
                 }
             }
             CommandGroup(replacing: .appSettings) {

@@ -44,4 +44,9 @@ swiftc -O -parse-as-library -swift-version 5 -sdk "$SDK" -target "$TARGET" \
   -o "$APP/Contents/MacOS/Grove"
 
 codesign --force --sign - "$APP" >/dev/null
+# The project copy is only for building. Launch Services otherwise lists it
+# next to the app in /Applications.
+touch "$ROOT/build/.metadata_never_index"
+LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+"$LSREGISTER" -u -f "$APP" >/dev/null || true
 echo "$APP"
