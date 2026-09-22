@@ -1,8 +1,103 @@
 # Grove
 
-Grove — карта места на диске для macOS. Программа обходит выбранную папку или том и сразу показывает, чем занято место: чем больше плитка, тем больше папка или файл. Пока идёт обход, карта обновляется, так что крупные объекты видны ещё до окончания сканирования.
+Grove is a macOS disk map. It scans a folder or volume and draws each item as a tile sized by the space it occupies. The map updates while the scan is still running. Larger tiles are larger items.
 
-Grove is a macOS disk map. It scans a folder or volume and draws each item as a tile sized by the space it occupies. The map updates while the scan is still running.
+## Download
+
+The built app is on the [latest GitHub release](https://github.com/TrueGeologist/grove/releases/latest): `Grove-1.1.0-macOS.zip`. Unzip it and move `Grove.app` to Applications.
+
+The zip includes both Apple Silicon and Intel. The first launch may say the developer cannot be verified. Right-click Grove and choose Open. If macOS still blocks it, use System Settings → Privacy & Security → Open Anyway.
+
+## Offline
+
+Grove does not use the network. The scan, the map, and the list stay on this Mac. File names, paths, and sizes are not sent anywhere: the app has no server and no network code. Permission prompts exist only so it can read folders on this computer. An internet connection is not required.
+
+## Features
+
+- Live scan, with the map updating before the walk finishes
+- Tile area equals allocated disk space
+- Drill into a folder and move back through the path bar
+- Largest-items list and free-space meter
+- Reveal in Finder, Quick Look, and Move to Trash
+- Name filter, including matches inside subfolders
+- File-type colors
+- Russian or English UI. Choose the language in the Grove menu → Settings… (⌘,). The system language is used until you pick one.
+- Grove Help, in the Help menu, has a short description, the developer, and a link to this repository.
+
+Allocated size is what deletion is likely to free. When a file’s logical size is much larger than its disk size, both numbers are shown.
+
+## Requirements
+
+- macOS 14 or later
+- [Xcode Command Line Tools](https://developer.apple.com/xcode/resources/). A full Xcode install is not required.
+
+Check:
+
+```bash
+xcode-select --install
+swift --version
+```
+
+The build targets the architecture of the machine you build on, Apple Silicon or Intel.
+
+## Build
+
+```bash
+git clone https://github.com/TrueGeologist/grove.git
+cd grove
+./build.sh
+open build/Grove.app
+```
+
+`./build.sh` creates `build/Grove.app`, signs it locally, and prints the path. The `build/` folder is not part of the repository.
+
+A copy you built yourself usually opens without the “unidentified developer” step. That step is for the downloaded zip.
+
+## How to use
+
+1. On the start screen, choose Home, Downloads, Documents, Desktop, a disk, or any other folder (⌘O).
+2. Wait until the large tiles appear. You can stop the scan and keep using the map already built.
+3. Click to select. Click the selected folder again, or double-click, to open it.
+4. Show in Finder reveals the item where it lives (⇧⌘R).
+5. Move to Trash asks for confirmation (⌘⌫). Restore the item from the Trash.
+6. The filter keeps name matches, including matches inside subfolders.
+7. Space opens Quick Look.
+
+Recent folders are remembered on this Mac and shown on the start screen.
+
+## Permissions
+
+Grove only reads what your account is allowed to read. Without the prompts below, some folders stay closed and the map is incomplete.
+
+- macOS asks separately the first time Grove opens Documents, Desktop, or Downloads. Choose Allow, or those folders are skipped.
+- Mail, Messages, and other users’ data need Full Disk Access. Grove does not appear there by itself: System Settings → Privacy & Security → Full Disk Access → +, choose Grove in Applications, and turn it on. Quit Grove (⌘Q), open it again, and scan once more.
+
+Unreadable folders are counted in the window; the rest of the map still works. Symbolic links are not followed, and a scan stays on the volume where it started. Pick each disk separately on the start screen.
+
+## Development
+
+Sources live in `Sources/`. The scan uses `getattrlistbulk`. The map is a squarified treemap drawn with a SwiftUI canvas.
+
+Check layout and scan speed:
+
+```bash
+swiftc -O -parse-as-library -swift-version 5 -D GROVE_BENCH \
+  -sdk "$(xcrun --show-sdk-path)" \
+  -target "$(uname -m)-apple-macosx14.0" \
+  -framework SwiftUI -framework AppKit -framework QuickLookUI \
+  Sources/*.swift -o build/grove-bench
+./build/grove-bench "$HOME/Downloads"
+```
+
+## License
+
+[MIT](LICENSE). You can use, copy, and modify Grove.
+
+---
+
+# По-русски
+
+Grove — карта места на диске для macOS. Программа обходит выбранную папку или том и сразу показывает, чем занято место: чем больше плитка, тем больше папка или файл. Пока идёт обход, карта обновляется, так что крупные объекты видны ещё до окончания сканирования.
 
 ## Скачать
 
@@ -100,61 +195,3 @@ swiftc -O -parse-as-library -swift-version 5 -D GROVE_BENCH \
 ## Лицензия
 
 [MIT](LICENSE). Программой можно пользоваться, копировать и изменять её.
-
----
-
-## English
-
-Grove shows what is using space on a Mac. Pick a folder or disk, and the window fills with tiles while the scan runs. Larger tiles are larger items.
-
-### Download
-
-The built app is on the [latest GitHub release](https://github.com/TrueGeologist/grove/releases/latest): `Grove-1.1.0-macOS.zip`. Unzip it and move `Grove.app` to Applications.
-
-The zip includes both Apple Silicon and Intel. The first launch may say the developer cannot be verified. Right-click Grove and choose Open. If macOS still blocks it, use System Settings → Privacy & Security → Open Anyway.
-
-### Offline
-
-Grove does not use the network. The scan, the map, and the list stay on this Mac. File names, paths, and sizes are not sent anywhere: the app has no server and no network code. Permission prompts exist only so it can read folders on this computer. An internet connection is not required.
-
-### Features
-
-- Live scan, with the map updating before the walk finishes
-- Tile area equals allocated disk space
-- Drill into a folder and move back through the path bar
-- Largest-items list and free-space meter
-- Reveal in Finder, Quick Look, and Move to Trash
-- Name filter, including matches inside subfolders
-- File-type colors
-- Russian or English UI. Choose the language in the Grove menu → Settings… (⌘,). The system language is used until you pick one.
-- Grove Help, in the Help menu, has a short description, the developer, and a link to this repository.
-
-Allocated size is what deletion is likely to free. When a file’s logical size is much larger than its disk size, both numbers are shown.
-
-### Requirements
-
-macOS 14 or later, plus Xcode Command Line Tools (`xcode-select --install`). A full Xcode install is not required. The build targets the architecture of the machine you build on.
-
-### Build
-
-```bash
-git clone https://github.com/TrueGeologist/grove.git
-cd grove
-./build.sh
-open build/Grove.app
-```
-
-If macOS blocks a downloaded copy because the developer cannot be verified, right-click `Grove.app` and choose Open.
-
-### Permissions
-
-Grove only reads what your account is allowed to read. Without the prompts below, some folders stay closed and the map is incomplete.
-
-- macOS asks separately the first time Grove opens Documents, Desktop, or Downloads. Choose Allow, or those folders are skipped.
-- Mail, Messages, and other users’ data need Full Disk Access. Grove does not appear there by itself: System Settings → Privacy & Security → Full Disk Access → +, choose Grove in Applications, and turn it on. Quit Grove (⌘Q), open it again, and scan once more.
-
-Unreadable folders are counted in the window; the rest of the map still works. Symbolic links are not followed, and a scan stays on the volume where it started.
-
-### License
-
-[MIT](LICENSE).
