@@ -38,7 +38,6 @@ struct BrowserView: View {
         .onChange(of: session.filter) { _, _ in
             session.scheduleFilterRefresh()
         }
-        .onDeleteCommand { session.trash() }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
         .background(GroveColor.canvas(scheme))
@@ -49,13 +48,20 @@ struct BrowserView: View {
         let largest = items.first?.allocSize ?? 1
         return BoundedColumn {
             volumeHeader
-            HStack {
-                Text(session.snapshot.filtering ? Copy.matches : Copy.largest)
-                    .font(.headline)
-                Spacer()
-                Text(Format.items(items.count))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 2) {
+                HStack {
+                    Text(session.snapshot.filtering ? Copy.matches : Copy.largest)
+                        .font(.headline)
+                    Spacer()
+                    Text(Format.items(items.count))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                if session.snapshot.emptyCount > 0, !session.snapshot.filtering {
+                    Text(Copy.emptyFiles(session.snapshot.emptyCount))
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
             }
             .padding(.horizontal, 14)
             .padding(.top, 12)
@@ -78,11 +84,6 @@ struct BrowserView: View {
                         Button(Copy.copyPath) {
                             session.select(item.id)
                             session.copySelectedPath()
-                        }
-                        Divider()
-                        Button(Copy.trash, role: .destructive) {
-                            session.select(item.id)
-                            session.trash()
                         }
                     }
             }
@@ -148,7 +149,7 @@ struct BrowserView: View {
         BoundedColumn {
             breadcrumb
             statusBar
-            if session.unreadable > 2, !session.hideAccessNote {
+            if session.unreadable > 0, !session.hideAccessNote {
                 accessNote
             }
             TreemapView()
@@ -257,10 +258,6 @@ struct BrowserView: View {
                 Button(Copy.reveal) { session.reveal() }
                     .buttonStyle(.bordered)
                     .controlSize(.large)
-                Button(Copy.trash, role: .destructive) { session.trash() }
-                    .buttonStyle(.bordered)
-                    .controlSize(.large)
-                    .disabled(selection.protected)
             } else {
                 Text(session.notice ?? Copy.hint)
                     .font(.callout)
@@ -291,6 +288,12 @@ struct BrowserView: View {
                 HStack(spacing: 8) {
                     Text("\(Format.bytes(selection.allocSize)) \(Copy.onDisk)")
                     Text(Format.share(selection.allocSize, of: max(session.snapshot.currentSize, 1)))
+                    if selection.unreadable {
+                        Text(Copy.unreadableFolder)
+                    }
+                    if selection.otherVolume {
+                        Text(Copy.otherDisk)
+                    }
                     if selection.isDirectory {
                         Text(Format.files(selection.fileCount))
                     } else if selection.logicalSize > selection.allocSize + 1024 * 1024,
@@ -342,14 +345,6 @@ struct BrowserView: View {
             .disabled(session.selectedID == nil)
             .keyboardShortcut("r", modifiers: [.command, .shift])
             .help(Copy.reveal)
-            Button(role: .destructive) {
-                session.trash()
-            } label: {
-                Image(systemName: "trash")
-            }
-            .disabled(session.selectedID == nil)
-            .keyboardShortcut(.delete, modifiers: .command)
-            .help(Copy.trash)
             Button(action: session.chooseFolder) {
                 Image(systemName: "folder.badge.plus")
             }
@@ -404,7 +399,7 @@ private struct BoundedColumn: Layout {
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) {
-        let heights = cache.heights.count == subviews.count ? cache.heights : Array(repeating: CGFloat(0), count: subviews.count)
+        let heights = resolvedHeights(in: bounds, subviews: subviews, cache: cache)
         var y = bounds.minY
         for index in subviews.indices {
             let height = heights[index]
@@ -415,6 +410,31 @@ private struct BoundedColumn: Layout {
             )
             y += height
         }
+    }
+
+    /// A new row, such as the access note, must not collapse the column to zero
+    /// while the height cache still describes the previous children.
+    private func resolvedHeights(in bounds: CGRect, subviews: Subviews, cache: Cache) -> [CGFloat] {
+        if cache.heights.count == subviews.count { return cache.heights }
+        guard !cache.heights.isEmpty else {
+            let each = bounds.height / CGFloat(max(subviews.count, 1))
+            return Array(repeating: each, count: subviews.count)
+        }
+        var next = Array(repeating: CGFloat(0), count: subviews.count)
+        let shared = min(cache.heights.count, next.count)
+        for index in 0..<shared {
+            next[index] = cache.heights[index]
+        }
+        let used = next.reduce(0, +)
+        let leftover = max(0, bounds.height - used)
+        let extra = next.count - shared
+        if extra > 0 {
+            let each = leftover / CGFloat(extra)
+            for index in shared..<next.count {
+                next[index] = each
+            }
+        }
+        return next
     }
 }
 
@@ -473,6 +493,12 @@ private struct SidebarRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(item.name)
                     .lineLimit(1)
+                if item.unreadable || item.otherVolume {
+                    Text(item.otherVolume ? Copy.otherDisk : Copy.unreadableFolder)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                }
                 if item.allocSize > 0 {
                     let fraction = min(max(CGFloat(item.allocSize) / CGFloat(max(maxSize, 1)), 0.04), 1)
                     Color.clear

@@ -16,6 +16,7 @@ enum FileCategory: UInt8 {
         let ext = (name as NSString).pathExtension.lowercased()
         if isDirectory {
             if ext == "app" || ext == "photoslibrary" || ext == "musiclibrary" { return .app }
+            if ext == "sparsebundle" || ext == "sparseimage" { return .disk }
             return .folder
         }
         switch ext {
@@ -253,7 +254,6 @@ enum Copy {
     static var filterPrompt: String { russian ? "Имя файла или папки" : "File or folder name" }
     static var up: String { russian ? "Наверх" : "Up" }
     static var reveal: String { russian ? "В Finder" : "Show in Finder" }
-    static var trash: String { russian ? "В Корзину" : "Move to Trash" }
     static var rescan: String { russian ? "Обновить" : "Rescan" }
     static var stop: String { russian ? "Остановить" : "Stop" }
     static var otherFolder: String { russian ? "Другая папка…" : "Another Folder…" }
@@ -277,18 +277,13 @@ enum Copy {
     static var noMatches: String { russian ? "Ничего не найдено" : "Nothing matches" }
     static var hint: String {
         russian
-            ? "Щелчок выбирает. Двойной щелчок открывает папку. Пробел — быстрый просмотр."
-            : "Click to select. Double-click a folder to open it. Space for Quick Look."
+            ? "Щелчок выбирает. Двойной щелчок открывает папку. Удаление — в Finder."
+            : "Click to select. Double-click a folder to open it. Delete from Finder."
     }
-    static var protectedTitle: String { russian ? "Эту папку нельзя удалить" : "This folder can’t be moved to the Trash" }
-    static var protectedBody: String {
-        russian
-            ? "Grove не удаляет системные и домашние папки целиком."
-            : "Grove won’t delete an entire system or home folder."
+    static var unreadableFolder: String { russian ? "Не удалось прочитать" : "Couldn’t read" }
+    static func emptyFiles(_ count: Int) -> String {
+        russian ? "Пустых файлов: \(count)" : "Empty files: \(count)"
     }
-    static var trashTitle: String { russian ? "Переместить в Корзину?" : "Move to the Trash?" }
-    static var cancel: String { russian ? "Отмена" : "Cancel" }
-    static var trashFailed: String { russian ? "Не удалось переместить в Корзину" : "Couldn’t move to the Trash" }
     static var accessTitle: String { russian ? "Часть папок недоступна" : "Some folders couldn’t be read" }
     static var accessBody: String {
         russian
@@ -304,7 +299,6 @@ enum Copy {
     static var otherDisk: String { russian ? "Другой диск" : "Another disk" }
     static var pathCopied: String { russian ? "Путь скопирован" : "Path copied" }
     static var continueMap: String { russian ? "Вернуться к карте" : "Back to the map" }
-    static var freedNote: String { russian ? "Освободится около" : "About this much will be freed" }
     static var downloads: String { russian ? "Загрузки" : "Downloads" }
     static var documents: String { russian ? "Документы" : "Documents" }
     static var desktop: String { russian ? "Рабочий стол" : "Desktop" }
@@ -319,8 +313,8 @@ enum Copy {
     static var helpMenu: String { russian ? "Справка по Grove" : "Grove Help" }
     static var aboutBody: String {
         russian
-            ? "Grove показывает, чем занято место на диске. Карта строится на этом компьютере: имена файлов, пути и размеры никуда не отправляются."
-            : "Grove shows what is using space on a disk. The map is built on this Mac: file names, paths, and sizes are not sent anywhere."
+            ? "Grove показывает, чем занято место на диске. Карта строится на этом компьютере: имена файлов, пути и размеры никуда не отправляются. Файлы программа не удаляет: выбранный объект открывается в Finder, и удалить его можно уже там."
+            : "Grove shows what is using space on a disk. The map is built on this Mac: file names, paths, and sizes are not sent anywhere. Grove does not delete files. Show the item in Finder, then delete it there."
     }
     static var developer: String { russian ? "Разработчик" : "Developer" }
     static var aboutClose: String { russian ? "Закрыть" : "Close" }

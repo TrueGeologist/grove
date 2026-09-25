@@ -188,44 +188,6 @@ final class GroveSession: ObservableObject {
         flash(Copy.pathCopied)
     }
 
-    func trash() {
-        guard let id = selectedID, let store, let path = store.path(for: id) else { return }
-        if store.protected(id: id) {
-            let alert = NSAlert()
-            alert.messageText = Copy.protectedTitle
-            alert.informativeText = Copy.protectedBody
-            alert.alertStyle = .warning
-            alert.addButton(withTitle: "OK")
-            alert.runModal()
-            return
-        }
-        let size = snapshot.selection?.allocSize ?? 0
-        let name = snapshot.selection?.name ?? (path as NSString).lastPathComponent
-        let alert = NSAlert()
-        alert.messageText = Copy.trashTitle
-        alert.informativeText = "\(name) — \(Format.bytes(size)). \(Copy.freedNote) \(Format.bytes(size))."
-        alert.alertStyle = .warning
-        alert.addButton(withTitle: Copy.trash)
-        alert.addButton(withTitle: Copy.cancel)
-        guard alert.runModal() == .alertFirstButtonReturn else { return }
-        do {
-            try FileManager.default.trashItem(at: URL(fileURLWithPath: path), resultingItemURL: nil)
-            let removedCurrent = isCurrentInside(id)
-            _ = store.remove(id: id)
-            if removedCurrent { goUp() }
-            selectedID = nil
-            refreshVolume(for: self.rootPath ?? path)
-            publish()
-        } catch {
-            let failure = NSAlert()
-            failure.messageText = Copy.trashFailed
-            failure.informativeText = error.localizedDescription
-            failure.alertStyle = .warning
-            failure.addButton(withTitle: "OK")
-            failure.runModal()
-        }
-    }
-
     func openPrivacySettings() {
         let candidates = [
             "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Privacy_AllFiles",
@@ -246,7 +208,7 @@ final class GroveSession: ObservableObject {
     }
 
     private func tick() {
-        guard let store else { return }
+        guard isScanning, let store else { return }
         let stats = store.stats()
         files = stats.files
         allocBytes = stats.allocBytes
@@ -316,11 +278,6 @@ final class GroveSession: ObservableObject {
     private func selectedPath() -> String? {
         guard let id = selectedID else { return nil }
         return store?.path(for: id)
-    }
-
-    private func isCurrentInside(_ id: Int64) -> Bool {
-        if currentID == id { return true }
-        return snapshot.crumbs.contains { $0.id == id }
     }
 
     private func contains(_ item: MapItem, id: Int64) -> Bool {

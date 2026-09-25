@@ -42,6 +42,8 @@ struct MapItem: Identifiable {
     var children: [MapItem]
     var kind: Kind
     var location: String
+    var unreadable: Bool = false
+    var otherVolume: Bool = false
 
     var isAggregate: Bool { kind == .aggregate }
 }
@@ -62,6 +64,8 @@ struct SelectionInfo: Identifiable {
     var fileCount: Int
     var share: Double
     var protected: Bool
+    var unreadable: Bool
+    var otherVolume: Bool
 }
 
 struct MapSnapshot {
@@ -74,6 +78,7 @@ struct MapSnapshot {
     var listItems: [MapItem] = []
     var selection: SelectionInfo?
     var filtering: Bool = false
+    var emptyCount: Int = 0
 
     static let empty = MapSnapshot()
 }
@@ -146,7 +151,13 @@ final class TreeStore: @unchecked Sendable {
         )
         if trimmed.isEmpty {
             snapshot.mapItems = mapChildren(of: current, depth: 0)
-            snapshot.listItems = Array(topLargest(current.children, 400).map { listItem($0) })
+            let empties = current.children.filter { !$0.removed && !$0.isDirectory && $0.allocSize == 0 }
+            snapshot.emptyCount = empties.count
+            var list = shownChildren(of: current, limit: 400).map { listItem($0) }
+            if list.count < 400 {
+                list.append(contentsOf: empties.prefix(400 - list.count).map { listItem($0) })
+            }
+            snapshot.listItems = list
         } else {
             let found = search(from: current, query: trimmed, limit: 240)
             snapshot.mapItems = found.map { listItem($0) }
@@ -290,7 +301,7 @@ final class TreeStore: @unchecked Sendable {
 
     private func mapChildren(of node: ScanNode, depth: Int) -> [MapItem] {
         let limit = depth == 0 ? 320 : (depth == 1 ? 22 : 8)
-        let top = topLargest(node.children, limit)
+        let top = shownChildren(of: node, limit: limit)
         var items: [MapItem] = []
         items.reserveCapacity(top.count + 1)
         var expanded = 0
@@ -339,7 +350,9 @@ final class TreeStore: @unchecked Sendable {
             fileCount: node.fileCount,
             children: [],
             kind: .node,
-            location: (node.path as NSString).deletingLastPathComponent
+            location: (node.path as NSString).deletingLastPathComponent,
+            unreadable: node.unreadable,
+            otherVolume: node.otherVolume
         )
     }
 
@@ -354,7 +367,9 @@ final class TreeStore: @unchecked Sendable {
             category: node.category,
             fileCount: node.fileCount,
             share: current.allocSize > 0 ? Double(node.allocSize) / Double(current.allocSize) : 0,
-            protected: ProtectedPath.contains(node.path)
+            protected: ProtectedPath.contains(node.path),
+            unreadable: node.unreadable,
+            otherVolume: node.otherVolume
         )
     }
 
@@ -395,7 +410,6 @@ final class TreeStore: @unchecked Sendable {
             if node.removed { return }
             if !isOrigin, node.name.range(of: query, options: .caseInsensitive) != nil {
                 consider(node)
-                if node.isDirectory { return }
             }
             if node.isDirectory {
                 for child in node.children { visit(child, isOrigin: false) }
@@ -403,6 +417,15 @@ final class TreeStore: @unchecked Sendable {
         }
         visit(root, isOrigin: true)
         return best.sorted { $0.allocSize > $1.allocSize }
+    }
+
+    /// Unreadable folders and other volumes stay visible even when they use no space.
+    private func shownChildren(of node: ScanNode, limit: Int) -> [ScanNode] {
+        let top = topLargest(node.children, limit)
+        let extra = node.children.filter { child in
+            !child.removed && (child.unreadable || child.otherVolume) && !top.contains { $0.id == child.id }
+        }
+        return extra + top
     }
 
     private func topLargest(_ nodes: [ScanNode], _ limit: Int) -> [ScanNode] {

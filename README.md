@@ -4,7 +4,7 @@ Grove is a macOS disk map. It scans a folder or volume and draws each item as a 
 
 ## Download
 
-The built app is on the [latest GitHub release](https://github.com/TrueGeologist/grove/releases/latest): `Grove-1.1.0-macOS.zip`. Unzip it and move `Grove.app` to Applications.
+The built app is on the [latest GitHub release](https://github.com/TrueGeologist/grove/releases/latest): `Grove-1.2.0-macOS.zip`. Unzip it and move `Grove.app` to Applications.
 
 The zip includes both Apple Silicon and Intel. The first launch may say the developer cannot be verified. Right-click Grove and choose Open. If macOS still blocks it, use System Settings → Privacy & Security → Open Anyway.
 
@@ -18,8 +18,10 @@ Grove does not use the network. The scan, the map, and the list stay on this Mac
 - Tile area equals allocated disk space
 - Drill into a folder and move back through the path bar
 - Largest-items list and free-space meter
-- Reveal in Finder, Quick Look, and Move to Trash
-- Name filter, including matches inside subfolders
+- Reveal in Finder and Quick Look. Grove does not delete files; deletion stays in Finder.
+- Name filter, including files inside a folder whose name also matches
+- Items that do not fit on the map are grouped into an “Everything else” tile
+- Unreadable folders and folders on another disk are labeled, instead of looking empty
 - File-type colors
 - Russian or English UI. Choose the language in the Grove menu → Settings… (⌘,). The system language is used until you pick one.
 - Grove Help, in the Help menu, has a short description, the developer, and a link to this repository.
@@ -58,10 +60,9 @@ A copy you built yourself usually opens without the “unidentified developer”
 1. On the start screen, choose Home, Downloads, Documents, Desktop, a disk, or any other folder (⌘O).
 2. Wait until the large tiles appear. You can stop the scan and keep using the map already built.
 3. Click to select. Click the selected folder again, or double-click, to open it.
-4. Show in Finder reveals the item where it lives (⇧⌘R).
-5. Move to Trash asks for confirmation (⌘⌫). Restore the item from the Trash.
-6. The filter keeps name matches, including matches inside subfolders.
-7. Space opens Quick Look.
+4. Show in Finder reveals the item where it lives (⇧⌘R). Delete it there.
+5. The filter keeps name matches, including files inside a folder whose name also matches.
+6. Space opens Quick Look.
 
 Recent folders are remembered on this Mac and shown on the start screen.
 
@@ -101,7 +102,7 @@ Grove — карта места на диске для macOS. Программа
 
 ## Скачать
 
-Готовую программу можно [скачать с GitHub](https://github.com/TrueGeologist/grove/releases/latest): файл `Grove-1.1.0-macOS.zip`. Распакуйте архив и перенесите `Grove.app` в «Программы».
+Готовую программу можно [скачать с GitHub](https://github.com/TrueGeologist/grove/releases/latest): файл `Grove-1.2.0-macOS.zip`. Распакуйте архив и перенесите `Grove.app` в «Программы».
 
 При первом запуске macOS может написать, что разработчик не опознан. Правый щелчок по Grove → «Открыть». Если этого мало: Системные настройки → Конфиденциальность и безопасность → «Всё равно открыть».
 
@@ -117,10 +118,11 @@ Grove работает без подключения к интернету. Об
 - Карта папок. Площадь плитки — это место, которое объект занимает на диске.
 - Вложенный просмотр. Двойной щелчок или кнопка «Открыть папку» заходит внутрь. Цепочка имён сверху возвращает на уровень выше.
 - Список крупных элементов слева и полоска свободного места на томе.
-- Переход к объекту в Finder.
+- Переход к объекту в Finder. Grove сама файлы не удаляет: удаление делается в Finder.
 - Быстрый просмотр по клавише Пробел.
-- Перемещение в Корзину. После удаления карта уменьшается сразу. Домашнюю папку и системные каталоги целиком удалить нельзя.
-- Фильтр по имени, в том числе внутри вложенных папок.
+- Фильтр по имени, в том числе файлы внутри папки с похожим именем.
+- То, что не помещается отдельной плиткой, собирается в плитку «Остальное».
+- Непрочитанные папки и папки с другого диска подписаны, а не выглядят пустыми.
 - Цвет по типу файла: видео, фото, архивы, документы, код, программы, образы дисков.
 - Русский и английский интерфейс. Язык выбирается в меню Grove → «Настройки…» (⌘,). По умолчанию берётся язык системы.
 - Справка по Grove — в меню «Справка»: короткое описание, разработчик и ссылка на этот репозиторий.
@@ -159,10 +161,9 @@ open build/Grove.app
 1. На стартовом экране выберите домашнюю папку, Загрузки, Документы, Рабочий стол, диск или любую другую папку (⌘O).
 2. Дождитесь, пока крупные плитки проявятся. Обход можно остановить и пользоваться уже построенной картой.
 3. Щелчок выбирает объект. Повторный щелчок по выбранной папке или двойной щелчок открывает её.
-4. «В Finder» показывает файл или папку там, где они лежат (⇧⌘R).
-5. «В Корзину» спрашивает подтверждение и убирает объект (⌘⌫). Восстановить его можно из Корзины.
-6. Поле фильтра оставляет на карте только совпадения по имени.
-7. Пробел открывает быстрый просмотр выбранного файла.
+4. «В Finder» показывает файл или папку там, где они лежат (⇧⌘R). Удалять нужно уже в Finder.
+5. Поле фильтра оставляет совпадения по имени, в том числе файлы внутри папки с похожим именем.
+6. Пробел открывает быстрый просмотр выбранного файла.
 
 Недавние папки запоминаются на этом Mac и показываются на стартовом экране.
 

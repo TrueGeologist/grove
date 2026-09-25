@@ -18,7 +18,7 @@ struct TreemapView: View {
 
     var body: some View {
         GeometryReader { geo in
-            let tiles = layout(session.snapshot.mapItems, in: CGRect(origin: .zero, size: geo.size), depth: 0, capacity: session.snapshot.currentSize)
+            let tiles = layout(session.snapshot.mapItems, in: CGRect(origin: .zero, size: geo.size), depth: 0, capacity: session.snapshot.currentSize, parentID: session.snapshot.currentID)
             ZStack(alignment: .topLeading) {
                 Canvas { context, canvasSize in
                     let clip = CGRect(origin: .zero, size: canvasSize)
@@ -69,11 +69,6 @@ struct TreemapView: View {
                         session.select(id)
                         session.copySelectedPath()
                     }
-                    Divider()
-                    Button(Copy.trash, role: .destructive) {
-                        session.select(id)
-                        session.trash()
-                    }
                 }
             }
             .focusable()
@@ -118,7 +113,15 @@ struct TreemapView: View {
             Text("\(Format.bytes(tile.item.allocSize)) \(Copy.onDisk) · \(Format.share(tile.item.allocSize, of: whole))")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            if tile.item.isDirectory {
+            if tile.item.unreadable {
+                Text(Copy.unreadableFolder)
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            } else if tile.item.otherVolume {
+                Text(Copy.otherDisk)
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            } else if tile.item.isDirectory {
                 Text(Format.files(tile.item.fileCount))
                     .font(.caption)
                     .foregroundStyle(.tertiary)
@@ -152,34 +155,48 @@ struct TreemapView: View {
             }
     }
 
-    private func layout(_ items: [MapItem], in rect: CGRect, depth: Int, capacity: Int64) -> [DrawTile] {
+    private func layout(_ items: [MapItem], in rect: CGRect, depth: Int, capacity: Int64, parentID: Int64) -> [DrawTile] {
         guard rect.width > 2, rect.height > 2 else { return [] }
-        var pieces = items.filter { $0.allocSize > 0 }
-        let shown = pieces.reduce(Int64(0)) { $0 + $1.allocSize }
-        let rest = capacity - shown
-        if depth > 0, rest > max(capacity / 30, 64 * 1024) {
-            pieces.append(
+        let visible = items.filter { $0.allocSize > 0 && !$0.isAggregate }
+        let alreadyHidden = items.filter(\.isAggregate).reduce(0) { $0 + $1.fileCount }
+        let shown = visible.reduce(Int64(0)) { $0 + $1.allocSize }
+        var rest = max(0, capacity - shown)
+        var hiddenFiles = alreadyHidden
+        var kept: [MapItem] = []
+        kept.reserveCapacity(visible.count)
+        let canvas = Double(rect.width * rect.height)
+        let total = Double(shown) + Double(rest)
+        for piece in visible {
+            let area = total > 0 ? Double(piece.allocSize) / total * canvas : 0
+            if area < 16 {
+                rest += piece.allocSize
+                hiddenFiles += max(piece.fileCount, piece.isDirectory ? 0 : 1)
+            } else {
+                kept.append(piece)
+            }
+        }
+        if rest > max(capacity / 30, 64 * 1024) {
+            kept.append(
                 MapItem(
-                    id: -(capacity &+ Int64(depth) &+ 3),
-                    name: "",
+                    id: -((parentID &* 16) &+ Int64(depth) &+ 1),
+                    name: Copy.remainder,
                     path: "",
                     allocSize: rest,
                     logicalSize: rest,
                     isDirectory: true,
                     category: .folder,
-                    fileCount: 0,
+                    fileCount: hiddenFiles,
                     children: [],
                     kind: .aggregate,
                     location: ""
                 )
             )
         }
-        let rects = TreemapLayout.rects(sizes: pieces.map(\.allocSize), in: rect)
+        let rects = TreemapLayout.rects(sizes: kept.map(\.allocSize), in: rect)
         var tiles: [DrawTile] = []
-        for (item, itemRect) in zip(pieces, rects) {
+        for (item, itemRect) in zip(kept, rects) {
             let box = itemRect.insetBy(dx: 1.25, dy: 1.25).intersection(rect)
             guard !box.isNull, box.width >= 1, box.height >= 1 else { continue }
-            if item.name.isEmpty { continue }
             let header = item.isDirectory && !item.children.isEmpty && box.width > 78 && box.height > 54
             tiles.append(DrawTile(id: item.id, item: item, rect: box, depth: depth, labelInHeader: header))
             if header || (item.isDirectory && !item.children.isEmpty && box.width > 28 && box.height > 28) {
@@ -190,7 +207,7 @@ struct TreemapView: View {
                     width: box.width - 6,
                     height: box.height - top - 3
                 )
-                tiles.append(contentsOf: layout(item.children, in: inner, depth: depth + 1, capacity: item.allocSize))
+                tiles.append(contentsOf: layout(item.children, in: inner, depth: depth + 1, capacity: item.allocSize, parentID: item.id))
             }
         }
         return tiles

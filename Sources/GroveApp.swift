@@ -72,7 +72,7 @@ struct AboutView: View {
     @Environment(\.dismiss) private var dismiss
 
     private var version: String {
-        let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.1"
+        let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.2"
         return "Grove \(short)"
     }
 
